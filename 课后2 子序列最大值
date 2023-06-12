@@ -1,0 +1,41 @@
+给定一长度为N的整数序列(a1,a2,…,aN) ，将其划分成多个子序列（此问题中子序列是连续的一段整数），满足每个子序列中整数的和不大于一个数B，设计一种划分方法，最小化所有子序列中最大值的和。说明其具有优化子结构及子问题重叠性质
+例如： 序列长度为8的整数序列(2,2,2,8,1,8,2,1)，B=17，可将其划分成三个子序列(2,2,2)，(8,1,8)以及(2,1)，则可满足每个子序列中整数和不大于17，所有子序列中最大值的和12为最终结果。
+
+
+dp[i] = min{ dp[j] + max{ a[j+1] + a[j+2] + ... + a[i] } }, 其中 j < i 且 max{ a[j+1] + a[j+2] + ... + a[i] } <= B
+
+
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+const int MAXN = 1000;
+int a[MAXN], dp[MAXN];
+
+int main() {
+    int N, B;
+    cin >> N >> B;
+    for (int i = 1; i <= N; i++) {
+        cin >> a[i];
+    }
+    memset(dp, 0x3f, sizeof(dp));
+    dp[0] = 0;
+    for (int i = 1; i <= N; i++) {
+        int sum = 0;
+        for (int j = i; j >= 1; j--) {
+            sum += a[j];
+            if (sum > B) break;
+            dp[i] = min(dp[i], dp[j-1] + max_sum(a, j, i));
+        }
+    }
+    cout << dp[N] << endl;
+    return 0;
+}
+
+int max_sum(int a[], int l, int r) {
+    int ans = a[l];
+    for (int i = l+1; i <= r; i++) {
+        ans = max(ans, a[i]);
+    }
+    return ans;
+}
