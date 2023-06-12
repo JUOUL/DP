@@ -1,0 +1,47 @@
+在自然语言处理中一个重要的问题是分词，例如句子“他说的确实在理”中“的确”“确实”“实在”“在理”都是常见的词汇，但是计算机必须为给定的句子准确判断出正确分词方法
+。一个简化的分词问题如下：给定一个长字符串y=y1y2…yn，分词是把y切分成若干连续部分，每部分都单独成为词汇。我们用函数quality(x)判断切分后的某词汇x=x1x2…xk的质量，函数值越高表示该词汇的正确性越高。
+分词的好坏用所有词汇的质量的和来表示。例如对句子“确实在理”分词，quality(确实) + quality(在理) > quality(确)+quality(实在)+quality(理)。请设计一个动态规划算法对字符串y分词，要求最大化所有词汇的质量和。
+（假定你可以调用quality(x)函数在一步内得到任何长度的词汇的质量） 
+
+
+该问题可以使用动态规划求解，具有子问题重叠性质和最优子结构性质。
+
+设f[i]表示前i个字符到1~i的任意一个位置切分，能得到的所有词汇的质量和的最大值，则状态转移方程为：
+
+f[i] = max(f[j] + quality(y[j+1~i]))，其中1<=j<=i
+
+其中quality(y[j+1~i])表示字符串y中从第j+1个字符到第i个字符组成的词汇的质量。
+
+该方程的含义是，将前i个字符切分成若干个词汇后，每个词汇的质量加起来的和最大。枚举切分点j，计算以此分割时的质量和，并选择最大值作为最终答案。
+
+最终答案为f[n]，即将整个字符串切分成若干个词汇后所有词汇的质量和的最大值。
+
+C++代码实现如下：
+
+c++
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+
+const int MAXN = 1010;
+int f[MAXN];
+string y;
+
+int quality(string x) {
+    // 假定已经实现了 quality 函数
+}
+
+int main() {
+    cin >> y;
+    memset(f, 0, sizeof(f));
+    for (int i = 1; i <= y.length(); i++) {
+        f[i] = quality(y.substr(0, i));
+        for (int j = 1; j < i; j++) {
+            f[i] = max(f[i], f[j] + quality(y.substr(j, i-j)));
+        }
+    }
+    cout << f[y.length()] << endl;
+    return 0;
+}
+时间复杂度为O(n^3)，空间复杂度为O(n)。需要注意的是，在对于每个j，可以通过记录y[0~j-1]中所有可能切分出来的词汇的质量和的最大值max_quality_j，减少quality(y[j+1~i])的计算次数，即只有当f[j]+max_quality_j比当前的f[i]大时，才需要计算quality(y[j+1~i])。
