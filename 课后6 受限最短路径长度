@@ -1,0 +1,48 @@
+受限最短路径长度问题：给定一无向图G=(V, E, A, B)，A(e)表示边e的长度，B(v)表示顶点v的花费，计算小明从顶点s到顶点d的最短路径长度，满足以下限制，初始时小明随身携带M元钱，
+每经过一个顶点v，须交B(v)的过路费，若身上有大于B(v)的钱则可以通过，否则不可以通过。求顶点s到顶点d的最短路径
+
+这是一个带有花费限制的最短路径问题，可以使用动态规划来解决。引入状态变量dp(i, j)，表示从起点s到顶点i，花费不超过j元钱的最短路径长度。
+
+根据题意，我们有转移方程：
+dp(i, j) = min(dp(k, j - B(i)) + A(i, k)), 其中k为i的前驱节点，B(i)为i点的花费
+
+其中，j - B(i)表示经过i节点时还剩下的钱数，若小于0则说明无法通过i节点。
+
+边界条件：dp(s, M) = 0，表示起点s花费不超过M元钱的最短路径长度为0。
+
+最终答案为dp(d, 0)。
+
+以下是C++代码实现：
+
+c++
+const int MAXN = ...; // 图的最大顶点数
+const int MAXM = ...; // 最大携带金额
+int dp[MAXN][MAXM+1]; // 状态数组
+
+// 邻接表存图
+vector<pair<int, int>> adj[MAXN];
+
+int main() {
+    int n, m, s, d;
+    // 读入n,m,s,d和图的邻接表adj
+
+    memset(dp, 0x3f, sizeof(dp)); // 初始化为无穷大
+    dp[s][m] = 0; // 起点花费不超过m的最短路径长度为0
+
+    for (int j = m; j >= 0; j--) { // 枚举花费
+        for (int i = 1; i <= n; i++) { // 枚举顶点
+            for (auto& [k, aik] : adj[i]) { // 枚举i的前驱节点k
+                int cost = B[i]; // i的花费
+                if (j - cost < 0) continue; // 没有足够的钱通过i节点
+                dp[i][j] = min(dp[i][j], dp[k][j-cost] + aik);
+            }
+        }
+    }
+
+    int ans = INT_MAX;
+    for (int j = 0; j <= m; j++) {
+        ans = min(ans, dp[d][j]);
+    }
+
+    return ans;
+}
