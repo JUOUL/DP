@@ -1,1 +1,42 @@
+给定个物品，每个物品有大小，价值。背包容量为。要求找到一组物品，这些物品整包完全占满背包容量，且总体价值最大。请写出动态规划迭代公式。
 
+这是一个经典的背包问题，可以使用动态规划来解决。我们引入状态变量dp(i, j)，表示前i个物品装入容量为j的背包中所能获得的最大价值。
+
+对于第i个物品，有两种选择：放入或不放入背包中。如果不放入，则dp(i, j) = dp(i-1, j)；如果放入，则dp(i, j) = dp(i-1, j-size[i]) + value[i]，其中size[i]和value[i]分别表示第i个物品的大小和价值。
+
+因此，动态转移方程为：
+dp(i,j) = max(dp(i-1,j), dp(i-1,j-size[i])+value[i])
+
+边界条件为：
+dp(0,j) = 0 (j=0,1,...,C)
+dp(i,0) = 0 (i=1,2,...,N)
+
+其中，C表示背包容量，N表示物品数量。
+
+最终答案为dp(N, C)。
+
+以下是C++代码实现：
+
+c++
+const int MAXN = ...; // 最大物品数量
+const int MAXC = ...; // 背包容量
+int size[MAXN], value[MAXN]; // size[i]表示第i个物品的大小，value[i]表示第i个物品的价值
+int dp[MAXN+1][MAXC+1]; // 状态数组
+
+int main() {
+    int N, C;
+    // 读入N,C和每个物品的大小和价值
+
+    memset(dp, 0, sizeof(dp)); // 初始化为0
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= C; j++) {
+            if (j >= size[i]) { // 能够放下第i个物品
+                dp[i][j] = max(dp[i-1][j], dp[i-1][j-size[i]] + value[i]);
+            } else { // 放不下第i个物品
+                dp[i][j] = dp[i-1][j];
+            }
+        }
+    }
+
+    return dp[N][C];
+}
