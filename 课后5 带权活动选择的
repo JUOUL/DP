@@ -1,0 +1,55 @@
+给定个活动，活动表示为一个三元组，其中表示活动开始时间，表示活动的结束时间，表示活动的权重。带权活动选择问题是选择一些活动，使得任意被选择的两个活动和执行时间互不相交，即区间与互不重叠，并且被选择的活动的权重和最大。请设计一种方法求解带权活动选择问题。
+
+该问题可以使用动态规划求解，具有子问题重叠性质和最优子结构性质。
+
+设f[i]表示前i个活动中选出一些活动使得任意两个被选择的活动执行时间互不相交，并且被选择的活动的权重和最大，则状态转移方程为：
+
+f[i] = max(f[j] + weight[i])，其中j是满足end[j]<=start[i]的最大下标
+
+其中weight[i]表示第i个活动的权重，start[i]表示第i个活动的开始时间，end[i]表示第i个活动的结束时间。
+
+该方程的含义是，在前i个活动中，选择一个活动i，再选择前j个活动中的一些活动，使得它们的执行时间互不相交，并且权重和最大。枚举上一个活动的结束时间小于等于当前活动的开始时间的最大下标j，计算以此为结束时间的最大权重和，并选择最大值作为f[i]的值。
+
+最终答案即为f[n]，n为总活动数。
+
+以下是C++代码实现：
+
+c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+
+using namespace std;
+
+const int MAXN = 1010;
+struct Activity {
+    int start, end, weight;
+} act[MAXN];
+int f[MAXN];
+
+bool cmp(Activity a, Activity b) {
+    return a.end < b.end;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    for (int i = 1; i <= n; i++) {
+        cin >> act[i].start >> act[i].end >> act[i].weight;
+    }
+    sort(act + 1, act + n + 1, cmp);
+    memset(f, 0, sizeof(f));
+    for (int i = 1; i <= n; i++) {
+        f[i] = act[i].weight;
+        for (int j = i - 1; j >= 1; j--) {
+            if (act[j].end <= act[i].start) {
+                f[i] = max(f[i], f[j] + act[i].weight);
+                break; // j是最大的满足条件的下标，不需要再往前枚举
+            }
+        }
+        f[i] = max(f[i], f[i-1]); // 不选i活动的情况
+    }
+    cout << f[n] << endl;
+    return 0;
+}
+时间复杂度为O(n^2)，空间复杂度为O(n)。需要注意的是，在计算f[i]时，可以从后往前枚举j，找到第一个满足条件的j即可，这样可以减少枚举次数。
