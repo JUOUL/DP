@@ -1,0 +1,57 @@
+对一棵树进行着色，每个结点可着黑色或白色，相邻结点不能着相同黑色，但可着相同白色。令树的根为r，请设计一种算法对树中尽量多的节点着黑色。
+
+
+
+我们可以使用动态规划求解该问题，具有子问题重叠性质。
+
+设f[u][0]表示以u为根节点子树中不选u时的最多黑色节点数，f[u][1]表示以u为根节点子树中选u时的最多黑色节点数。则状态转移方程如下：
+
+对于u的每个儿子v：
+f[u][0] += max(f[v][0], f[v][1])；
+f[u][1] += f[v][0]；
+
+其中，对于u不选时，它的最大黑色节点数由它的儿子节点的最大黑色节点数决定；对于u选时，它的最大黑色节点数由它所有儿子节点不选时的最大黑色节点数决定。
+
+最终答案即为f[r][0]和f[r][1]的较大值。
+
+C++代码实现如下：
+
+c++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+const int MAXN = 100010;
+
+int n;
+vector<int> graph[MAXN];
+int f[MAXN][2];
+
+void dfs(int u, int father) {
+    f[u][0] = 0;
+    f[u][1] = 1;
+    for (int i = 0; i < graph[u].size(); i++) {
+        int v = graph[u][i];
+        if (v == father) {
+            continue;
+        }
+        dfs(v, u);
+        f[u][0] += max(f[v][0], f[v][1]);
+        f[u][1] += f[v][0];
+    }
+}
+
+int main() {
+    cin >> n;
+    for (int i = 1; i <= n - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+    dfs(1, 0);
+    cout << max(f[1][0], f[1][1]) << endl;
+    return 0;
+}
+时间复杂度为O(n)，空间复杂度为O(n)。
